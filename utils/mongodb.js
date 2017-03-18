@@ -1,18 +1,19 @@
 var mongoDbObj;
 var mongoClient=require('mongodb').MongoClient;
 var mongodb = function (next) {
-	mongoClient.connect('mongodb://localhost/rssfeedsDb', function(err, db){
-		if(err) {
-			console.log(err);
-			next(err);
-		}else{
-			console.log("Connected to MongoDB");
-			//mongoDbObj={db: db,	pollingDetails: db.collection('pollingDetails')};
-			next("",db);
+	//mongoClient.connect('mongodb://localhost/rssfeedsDb', function(err, db){
+	mongoClient.connect('mongodb://manav:123456@ds135690.mlab.com:35690/rssfeeds', function(err, db){
+				if(err) {
+					console.log(err);
+					next(err);
+				}else{
+					console.log("Connected to MongoDB");
+					//mongoDbObj={db: db,	pollingDetails: db.collection('pollingDetails')};
+					next("",db);
 
-		}
-	});
-};
+				}
+		});
+	};
 
 mongodb.insert = function (db,collection,obj) {
 	mongoDbObj={db: db,	collection: db.collection(collection)};
