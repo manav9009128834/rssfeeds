@@ -8,3 +8,12 @@
 
 
 node_modules/
+app.js
+bin/
+package.json
+public/
+routes/
+rss.txt
+rssfeed.txt
+utils/
+views/
