@@ -36,7 +36,7 @@ feedsUrl.map(function (obj) {
               console.log(err);
               // update polling detail status : failed
               data.status = "fail";
-              mongodb.pollingDetail(dbObj,'pollingDetail',data,function (err,result) {
+              mongodb.updatepollingDetail(dbObj,'pollingDetail',data,function (err,result) {
                 if (err) {
                   console.log(err);
                 } else {
@@ -53,29 +53,30 @@ feedsUrl.map(function (obj) {
                 } else {
                   console.log("update pollingDetail: " + JSON.stringify(result));
                   // if polling detail updated success, then read rss and then scrape one by one link
-                  // mongodb.read(dbObj, 'rssFeeds',{},function (err,data){
-                  //   if (err) {
-                  //     console.log(err);
-                  //   } else {
-                  //     //console.log("data rssfeeds: " + JSON.stringify(data));
-                  //     data.map(function (item) {
-                  //       //console.log("data item: " + JSON.stringify(item));
-                  //       console.log("data item: " + JSON.stringify(item.items[0].url));
-                  //       console.log("data item: " + JSON.stringify(item.publisher_name));
-                  //       switch (item.publisher_name){
-                  //         case 'economictimes' : scrape_economictimes(item.items[0].url,
-                  //             function (err,data) {
-                  //               if(err){
-                  //                 console.log("err in scrapping economictimes"+err);
-                  //               }else {
-                  //                 console.log(JSON.stringify(data));
-                  //               }
-                  //             }
-                  //         );
-                  //       }
-                  //     });
-                  //   }
-                  // });
+                  mongodb.read(dbObj, 'rssFeeds',{pollingId:result.pollingId},function (err,data){
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      console.log("data rssfeeds: " +result.pollingId+" :"+ JSON.stringify(data));
+                      //iterate rssfeed items of this pollingId
+                      // data.map(function (item) {
+                      //   //console.log("data item: " + JSON.stringify(item));
+                      //   console.log("rssfeed data url: " + JSON.stringify(item.items[0].url));
+                      //   console.log("rssfeed data publisher_name: " + JSON.stringify(item.publisher_name));
+                      //   // switch (item.publisher_name){
+                      //   //   case 'economictimes' : scrape_economictimes(item.items[0].url,
+                      //   //       function (err,data) {
+                      //   //         if(err){
+                      //   //           console.log("err in scrapping economictimes"+err);
+                      //   //         }else {
+                      //   //           console.log(JSON.stringify(data));
+                      //   //         }
+                      //   //       }
+                      //   //   );
+                      //   // }
+                      // });
+                    }
+                  });
                 }
               });
             }

@@ -37,7 +37,7 @@ mongodb.read = function (db,collection,query,next) {
 		console.log(err);
 		next(err);
 	}else{
-		console.log("data: "+JSON.stringify(data));
+		console.log("data: from "+collection+" :"+JSON.stringify(data));
 		next("",data);
 		}
 	});
@@ -66,6 +66,7 @@ mongodb.updatepollingDetail = function (db,collection,data,cbk) {
 			cbk(err);
 		}else{
 			console.log("updatepollingDetail result: "+JSON.stringify(result));
+			result.pollingId = data.pollingId;
 			cbk("",result);
 		}
 	});
