@@ -1,0 +1,36 @@
+
+
+http://zeenews.india.com/rss/india-national-news.xml
+
+http://economictimes.indiatimes.com/rssfeedstopstories.cms
+
+http://timesofindia.indiatimes.com/rssfeedstopstories.cms
+
+http://www.hindustantimes.com/rss/topnews/rssfeed.xml
+
+Task:
+
+Write a Node js application that polls the RSS latest feeds from News Websites like ndtv, economictimes, hindustantimes etc.
+
+Get the link of the articles by parsing the XML, visit the URL and Scrape the content
+(title, description, author, main image, content text, published at ) and store in DB.
+
+And also add a feature if HTML structure changes at publisher website, notify admin
+(put any dummy email) with email which contains HTML Tag changes and keep that article id in waiting state
+so that the failed article will be in pending state.
+
+Create the Below API Endpoints:
+
+1.list out all the articles.
+2.search the articles by title,description,author.
+
+Create a web interface to list out statistics which have the below details:
+
+1. No. of articles for a particular publisher scrapped for a day
+2. No. of articles failed at scrapping.
+3. No. of polling happened a day for a particular publisher.
+4. List if Articles in waiting stage.
+
+Try to do any of 3 News Websites which have RSS feeds.
+
+Note: Use Mongo DB for Database Storage
