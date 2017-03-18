@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var feedsUrl = require('./utils/feedsUrl'); // feeds array of objects
 var mongodb =  require('./utils/mongodb');
 var pollrss =  require('./utils/pollrss');
+var scrape_economictimes =  require('./utils/scrape_economictimes');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
@@ -59,22 +60,38 @@ feedsUrl.map(function (obj) {
                     } else {
                       console.log("data rssfeeds: " +result.pollingId+" :"+ JSON.stringify(data));
                       //iterate rssfeed items of this pollingId
-                      // data.map(function (item) {
-                      //   //console.log("data item: " + JSON.stringify(item));
-                      //   console.log("rssfeed data url: " + JSON.stringify(item.items[0].url));
-                      //   console.log("rssfeed data publisher_name: " + JSON.stringify(item.publisher_name));
-                      //   // switch (item.publisher_name){
-                      //   //   case 'economictimes' : scrape_economictimes(item.items[0].url,
-                      //   //       function (err,data) {
-                      //   //         if(err){
-                      //   //           console.log("err in scrapping economictimes"+err);
-                      //   //         }else {
-                      //   //           console.log(JSON.stringify(data));
-                      //   //         }
-                      //   //       }
-                      //   //   );
-                      //   // }
-                      // });
+                      data.map(function (item) {
+                        //console.log("data item: " + JSON.stringify(item));
+                        //console.log("rssfeed data url: " + JSON.stringify(item.items[0].url));
+                        //console.log("rssfeed data publisher_name: " + JSON.stringify(item.publisher_name));
+                        item.items.map(function (eachfeed) {
+                          eachfeed.pollingId = result.pollingId;
+                          eachfeed.rssfeedId = item._id;
+                          eachfeed.rssfeedItemIndex = arguments[1];
+                          console.log("rss feed index:"+arguments[1]);
+                          //console.log("eachfeed url: " + JSON.stringify(eachfeed.url));
+                          switch (item.publisher_name){
+                            case 'economictimes' : scrape_economictimes(eachfeed, function (err,data) {
+                                  if(err){
+                                    console.log("err in scrapping economictimes"+err);
+                                  }else {
+                                    console.log(JSON.stringify(data));
+                                    //insert into articles collection
+                                    mongodb.insert(dbObj, 'article', data, function (err, result) {
+                                      if (err) {
+                                        console.log("article not inserted");
+                                      } else {
+                                        console.log("article inserted data: " + JSON.stringify(result.ops[0]._id));
+                                      }
+                                    });
+                                  }
+                                });
+                                break;
+                            default : console.log("switch default");
+                          }
+                        });
+
+                      });
                     }
                   });
                 }
@@ -83,7 +100,7 @@ feedsUrl.map(function (obj) {
           });
         }
       });
-      //update
+
     }
   });
     }
