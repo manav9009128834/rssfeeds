@@ -4,38 +4,87 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var feedsUrl = require('./utils/feedsUrl');
+var feedsUrl = require('./utils/feedsUrl'); // feeds array of objects
 var mongodb =  require('./utils/mongodb');
 var pollrss =  require('./utils/pollrss');
-
-
 var index = require('./routes/index');
 var users = require('./routes/users');
 
+// iterate all feed urls
 feedsUrl.map(function (obj) {
   console.log(obj);
   mongodb(function (err, dbObj) {
     if (err) {
       console.log("err in connecting utils");
-      next(err);
     } else {
       console.log("connected utils: " + dbObj);
       var data = {};
       data.publisher_name = obj.publisher_name;
       data.time = new Date();
       data.url = obj.url;
-      mongodb.insert(dbObj, 'pollingDetail', data);
+      //insert into polling detail
+      mongodb.insert(dbObj, 'pollingDetail', data, function (err, result) {
+        if (err) {
+          console.log("pollingDetail not inserted");
+        } else {
+          console.log("pollingDetail inserted data: " + JSON.stringify(result.ops[0]._id));
+          var pollingId = result.ops[0]._id;
+          // get rss feed and insert that rss into rssfeed collection
+          pollrss(obj,pollingId,function (err, data) {
+            //if error in getting rss feed
+            if (err) {
+              console.log(err);
+              // update polling detail status : failed
+              data.status = "fail";
+              mongodb.pollingDetail(dbObj,'pollingDetail',data,function (err,result) {
+                if (err) {
+                  console.log(err);
+                } else {
+                  console.log("update pollingDetail: " + JSON.stringify(result));
+                }
+              });
+            } else {
+              //if rssfeed inserted successfully
+              console.log("poll rss: " + JSON.stringify(data));
+              // update polling detail status : success
+              mongodb.updatepollingDetail(dbObj,'pollingDetail',data,function (err,result) {
+                if(err){
+                  console.log(err);
+                } else {
+                  console.log("update pollingDetail: " + JSON.stringify(result));
+                  // if polling detail updated success, then read rss and then scrape one by one link
+                  // mongodb.read(dbObj, 'rssFeeds',{},function (err,data){
+                  //   if (err) {
+                  //     console.log(err);
+                  //   } else {
+                  //     //console.log("data rssfeeds: " + JSON.stringify(data));
+                  //     data.map(function (item) {
+                  //       //console.log("data item: " + JSON.stringify(item));
+                  //       console.log("data item: " + JSON.stringify(item.items[0].url));
+                  //       console.log("data item: " + JSON.stringify(item.publisher_name));
+                  //       switch (item.publisher_name){
+                  //         case 'economictimes' : scrape_economictimes(item.items[0].url,
+                  //             function (err,data) {
+                  //               if(err){
+                  //                 console.log("err in scrapping economictimes"+err);
+                  //               }else {
+                  //                 console.log(JSON.stringify(data));
+                  //               }
+                  //             }
+                  //         );
+                  //       }
+                  //     });
+                  //   }
+                  // });
+                }
+              });
+            }
+          });
+        }
+      });
+      //update
     }
   });
-      // pollrss(obj,function (err, data) {
-      //   if (err) {
-      //     console.log(err);
-      //   } else {
-      //     console.log("poll rss: " + JSON.stringify(data));
-      //   }
-      // });
-
-
     }
 );
 

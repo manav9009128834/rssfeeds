@@ -15,16 +15,18 @@ var mongodb = function (next) {
 		});
 	};
 
-mongodb.insert = function (db,collection,obj) {
+mongodb.insert = function (db,collection,obj,next) {
 	mongoDbObj={db: db,	collection: db.collection(collection)};
 	mongoDbObj.collection.insert(obj,function(err, result){
 		if(err){
 			//Handle the failure case
 			console.log(err);
+			next(err);
 		}
 		else{
 			//Handle the success case
-			console.log("success: "+JSON.stringify(result));
+			//console.log("success: "+JSON.stringify(result));
+			next("",result);
 		}
 	});
 };
@@ -41,13 +43,30 @@ mongodb.read = function (db,collection,query,next) {
 	});
 };
 
-mongodb.update = function (db,collection) {
+mongodb.update = function (db,collection,data,cbk) {
 	mongoDbObj={db: db,	collection: db.collection(collection)};
 	mongoDbObj.collection.update({_id:"58cc364d2176671abbd882d8"},{$set: {name:"Ravi Kiran"}},{w:1}, function(err, result){
 		if(err) {
 			console.log(err);
+			cbk(err);
 		}else{
 			console.log("result: "+JSON.stringify(result));
+			cbk("",result);
+		}
+	});
+};
+
+
+mongodb.updatepollingDetail = function (db,collection,data,cbk) {
+	mongoDbObj={db: db,	collection: db.collection(collection)};
+	var status = data.status == "success" ? "success" : "fail";
+	mongoDbObj.collection.update({_id:data.pollingId},{$set: {status:status}},{w:1}, function(err, result){
+		if(err) {
+			console.log(err);
+			cbk(err);
+		}else{
+			console.log("updatepollingDetail result: "+JSON.stringify(result));
+			cbk("",result);
 		}
 	});
 };
