@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1= title
+  //p  #{title}
+  ol
+  each item in data
+    li= item.title
+    img(src= item.main_image)
+    p= item.description
+    p= item.author
+    p= item.time
+    hr
