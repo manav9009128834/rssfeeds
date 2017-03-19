@@ -52,130 +52,115 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-/*
+var pollrssfeeds = function () {
 // iterate all feed urls
-feedsUrl.map(function (obj) {
-  console.log(obj);
-  mongodb(function (err, dbObj) {
-    if (err) {
-      console.log("err in connecting utils");
-    } else {
-      console.log("connected utils: " + dbObj);
-      var data = {};
-      data.publisher_name = obj.publisher_name;
-      data.time = new Date();
-      data.url = obj.url;
-      //insert into polling detail
-      mongodb.insert(dbObj, 'pollingDetail', data, function (err, result) {
-        if (err) {
-          console.log("pollingDetail not inserted");
-        } else {
-          console.log("pollingDetail inserted data: " + JSON.stringify(result.ops[0]._id));
-          var pollingId = result.ops[0]._id;
-          // get rss feed and insert that rss into rssfeed collection
-          pollrss(obj,pollingId,function (err, data) {
-            //if error in getting rss feed
-            if (err) {
-              console.log(err);
-              // update polling detail status : failed
-              data.status = "fail";
-              mongodb.updatepollingDetail(dbObj,'pollingDetail',data,function (err,result) {
-                if (err) {
-                  console.log(err);
-                } else {
-                  console.log("update pollingDetail: " + JSON.stringify(result));
-                }
-              });
-            } else {
-              //if rssfeed inserted successfully
-              console.log("poll rss: " + JSON.stringify(data));
-              // update polling detail status : success
-              mongodb.updatepollingDetail(dbObj,'pollingDetail',data,function (err,result) {
-                if(err){
-                  console.log(err);
-                } else {
-                  console.log("update pollingDetail: " + JSON.stringify(result));
-                  // if polling detail updated success, then read rss and then scrape one by one link
-                  mongodb.read(dbObj, 'rssFeeds',{pollingId:result.pollingId},function (err,data){
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      console.log("data rssfeeds: " +result.pollingId+" :"+ JSON.stringify(data));
-                      //iterate rssfeed items of this pollingId
-                      data.map(function (item) {
-                        //console.log("data item: " + JSON.stringify(item));
-                        //console.log("rssfeed data url: " + JSON.stringify(item.items[0].url));
-                        //console.log("rssfeed data publisher_name: " + JSON.stringify(item.publisher_name));
-                        item.items.map(function (eachfeed) {
-                          eachfeed.pollingId = result.pollingId;
-                          eachfeed.rssfeedId = item._id;
-                          eachfeed.rssfeedItemIndex = arguments[1];
-                          console.log("rss feed index:"+arguments[1]);
-                          //console.log("eachfeed url: " + JSON.stringify(eachfeed.url));
-                          switch (item.publisher_name){
-                            case 'economictimes' : scrape_economictimes(eachfeed, function (err,data) {
-                                  if(err){
-                                    console.log("err in scrapping economictimes"+err);
-                                  }else {
-                                    console.log(JSON.stringify(data));
-                                    //insert into articles collection
-                                    mongodb.insert(dbObj, 'article', data, function (err, result) {
+  feedsUrl.map(function (obj) {
+        console.log(obj);
+        mongodb(function (err, dbObj) {
+          if (err) {
+            console.log("err in connecting utils");
+          } else {
+            console.log("connected utils: " + dbObj);
+            var data = {};
+            data.publisher_name = obj.publisher_name;
+            data.time = new Date();
+            data.url = obj.url;
+            //insert into polling detail
+            mongodb.insert(dbObj, 'pollingDetail', data, function (err, result) {
+              if (err) {
+                console.log("pollingDetail not inserted");
+              } else {
+                console.log("pollingDetail inserted data: " + JSON.stringify(result.ops[0]._id));
+                var pollingId = result.ops[0]._id;
+                // get rss feed and insert that rss into rssfeed collection
+                pollrss(obj, pollingId, function (err, data) {
+                  //if error in getting rss feed
+                  if (err) {
+                    console.log(err);
+                    // update polling detail status : failed
+                    data.status = "fail";
+                    mongodb.updatepollingDetail(dbObj, 'pollingDetail', data, function (err, result) {
+                      if (err) {
+                        console.log(err);
+                      } else {
+                        console.log("update pollingDetail: " + JSON.stringify(result));
+                      }
+                    });
+                  } else {
+                    //if rssfeed inserted successfully
+                    console.log("poll rss: " + JSON.stringify(data));
+                    // update polling detail status : success
+                    mongodb.updatepollingDetail(dbObj, 'pollingDetail', data, function (err, result) {
+                      if (err) {
+                        console.log(err);
+                      } else {
+                        console.log("update pollingDetail: " + JSON.stringify(result));
+                        // if polling detail updated success, then read rss and then scrape one by one link
+                        mongodb.read(dbObj, 'rssFeeds', {pollingId: result.pollingId}, function (err, data) {
+                          if (err) {
+                            console.log(err);
+                          } else {
+                            console.log("data rssfeeds: " + result.pollingId + " :" + JSON.stringify(data));
+                            //iterate rssfeed items of this pollingId
+                            data.map(function (item) {
+                              //console.log("data item: " + JSON.stringify(item));
+                              //console.log("rssfeed data url: " + JSON.stringify(item.items[0].url));
+                              //console.log("rssfeed data publisher_name: " + JSON.stringify(item.publisher_name));
+                              item.items.map(function (eachfeed) {
+                                eachfeed.pollingId = result.pollingId;
+                                eachfeed.rssfeedId = item._id;
+                                eachfeed.rssfeedItemIndex = arguments[1];
+                                console.log("rss feed index:" + arguments[1]);
+                                //console.log("eachfeed url: " + JSON.stringify(eachfeed.url));
+                                switch (item.publisher_name) {
+                                  case 'economictimes' :
+                                    scrape_economictimes(eachfeed, function (err, data) {
                                       if (err) {
-                                        console.log("article not inserted");
+                                        console.log("err in scrapping economictimes" + err);
                                       } else {
-                                        console.log("article inserted data: " + JSON.stringify(result.ops[0]._id));
+                                        console.log(JSON.stringify(data));
+                                        //insert into articles collection
+                                        mongodb.insert(dbObj, 'article', data, function (err, result) {
+                                          if (err) {
+                                            console.log("article not inserted");
+                                          } else {
+                                            console.log("article inserted data: " + JSON.stringify(result.ops[0]._id));
+                                          }
+                                        });
                                       }
                                     });
-                                  }
-                                });
-                                break;
-                            default : console.log("switch default");
+                                    break;
+                                  default :
+                                    console.log("switch default");
+                                }
+                              });
+
+                            });
                           }
                         });
+                      }
+                    });
+                  }
+                });
+              }
+            });
 
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
-
-    }
-  });
-    }
-);
-*/
-
-
-
-// //call mongodb
-// mongodb(function (err,dbObj){
-//    if(err){
-//      console.log("err in connecting utils");
-//    }else {
-//      console.log("connected utils: "+dbObj);
-//      mongodb.insert(dbObj,'pollingDetails');
-//      mongodb.read(dbObj,'pollingDetails');
-//      mongodb.update(dbObj,'pollingDetails');
-//      //mongodb.delete(dbObj,'pollingDetails');
-//    }
-// });
-
-
-
-
-
+          }
+        });
+      }
+  );
+}
+//
 //cron job
-// var schedule = require('node-schedule');
-// var rule = new schedule.RecurrenceRule();
-// rule.second = [0, 10, 20];
-// //var j = schedule.scheduleJob('*/1 * * * *', function(){
-// var j = schedule.scheduleJob(rule, function(){
-//   console.log('The answer to life, the universe, and everything!');
-// });
+var schedule = require('node-schedule');
+var rule = new schedule.RecurrenceRule();
+//rule.second = [0, 10, 20];
+rule.minute = new schedule.Range(0, 59, 10); // every 10 minutes
+//var j = schedule.scheduleJob('*/1 * * * *', function(){
+var j = schedule.scheduleJob(rule, function(){
+  console.log('Polling Rss feeds from news websites');
+  pollrssfeeds();
+});
 
 
 
