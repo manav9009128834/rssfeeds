@@ -45,7 +45,7 @@ mongodb.read = function (db,collection,query,next) {
 
 mongodb.readarticles = function (db,collection,query,next) {
 	mongoDbObj={db: db,	collection: db.collection(collection)};
-	mongoDbObj.collection.find().limit(5).toArray(function(err, data){
+	mongoDbObj.collection.find(query).limit(5).toArray(function(err, data){
 		if(err) {
 			console.log(err);
 			next(err);

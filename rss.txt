@@ -8,6 +8,8 @@ http://timesofindia.indiatimes.com/rssfeedstopstories.cms
 
 http://www.hindustantimes.com/rss/topnews/rssfeed.xml
 
+> mongo ds135690.mlab.com:35690/rssfeeds -u manav -p 123456
+
 Task:
 
 Write a Node js application that polls the RSS latest feeds from News Websites like ndtv, economictimes, hindustantimes etc.
