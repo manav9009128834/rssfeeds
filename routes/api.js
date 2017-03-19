@@ -3,7 +3,7 @@ var router = express.Router();
 var mongodb =  require('../utils/mongodb');
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
+router.get('/articles', function(req, res, next) {
   mongodb(function (err, dbObj) {
     if (err) {
       console.log("err in connecting db");
@@ -16,8 +16,8 @@ router.get('/', function(req, res, next) {
           res.send('respond with a resource: '+err);
         } else {
           console.log("data articles :" + JSON.stringify(data));
-          //res.send('respond with a resource: '+JSON.stringify(data));
-          res.render('articles', { data: data, title : 'Articles list'});
+          res.json(data);
+          //res.render('articles', { data: data, title : 'Articles list'});
         }
       });
     }
