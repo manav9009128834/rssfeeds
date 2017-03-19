@@ -43,6 +43,19 @@ mongodb.read = function (db,collection,query,next) {
 	});
 };
 
+mongodb.readarticles = function (db,collection,query,next) {
+	mongoDbObj={db: db,	collection: db.collection(collection)};
+	mongoDbObj.collection.find().limit(1).toArray(function(err, data){
+		if(err) {
+			console.log(err);
+			next(err);
+		}else{
+			console.log("data: from "+collection+" :"+JSON.stringify(data));
+			next("",data);
+		}
+	});
+};
+
 mongodb.update = function (db,collection,data,cbk) {
 	mongoDbObj={db: db,	collection: db.collection(collection)};
 	mongoDbObj.collection.update({_id:"58cc364d2176671abbd882d8"},{$set: {name:"Ravi Kiran"}},{w:1}, function(err, result){
